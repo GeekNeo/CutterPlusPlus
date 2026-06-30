@@ -4,9 +4,11 @@
 /* See LICENSE file in the root directory for full license text. */
 
 #include "Cutter++Plugin.h"
+#include "ICPPExec.h"
 #include "SourceEdit.h"
 
 #include <MainWindow.h>
+#include <QDir>
 #include <QTimer>
 #include <common/Configuration.h>
 #include <common/TempConfig.h>
@@ -84,3 +86,30 @@ void CutterPlusPlusPluginWidget::formatTextRect() const {
     block = block.next();
   }
 }
+
+QString CutterPlusPlusPluginWidget::saveCode() {
+  QString cursrc = sourcePath.isEmpty()
+                       ? (QDir::tempPath() + QDir::separator() + "Cutter++.cc")
+                       : sourcePath;
+  QFile file(cursrc);
+  if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+    Core()->message(QString("Could not open file for writing: ") +
+                    file.errorString());
+    return "";
+  }
+  QTextStream out(&file);
+  out << sourceEdit->toPlainText();
+  return cursrc;
+}
+
+void CutterPlusPlusPluginWidget::onRunCode() {
+  QString srcpath = saveCode();
+  if (srcpath.length())
+    ICPPExec::inst()->run(srcpath);
+}
+
+void CutterPlusPlusPluginWidget::onLoad() {}
+
+void CutterPlusPlusPluginWidget::onSave() {}
+
+void CutterPlusPlusPluginWidget::onAbout() {}

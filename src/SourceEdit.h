@@ -8,20 +8,17 @@
 #include <featherpad/textedit.h>
 
 class QAction;
+class CutterPlusPlusPluginWidget;
 
 class SourceEdit : public FeatherPad::TextEdit {
   Q_OBJECT
 
 public:
-  SourceEdit(const QFont &font, QWidget *parent = nullptr,
+  SourceEdit(const QFont &font, CutterPlusPlusPluginWidget *parent,
              int bgColorValue = 255);
   virtual ~SourceEdit() {}
 
 private slots:
-  void onRunCode();
-  void onLoad();
-  void onSave();
-  void onAbout();
   void showCustomContextMenu(const QPoint &pt);
 
 private:

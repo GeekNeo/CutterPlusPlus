@@ -4,11 +4,15 @@
 /* See LICENSE file in the root directory for full license text. */
 
 #include "SourceEdit.h"
+#include "Cutter++Plugin.h"
+
 #include <QMenu>
 #include <featherpad/config.h>
 #include <featherpad/highlighter/highlighter.h>
 
-SourceEdit::SourceEdit(const QFont &font, QWidget *parent, int bgColorValue) {
+SourceEdit::SourceEdit(const QFont &font, CutterPlusPlusPluginWidget *parent,
+                       int bgColorValue)
+    : FeatherPad::TextEdit(parent, bgColorValue) {
   setProg("cpp");
   setEditorFont(font);
   showLineNumbers(true);
@@ -23,7 +27,14 @@ SourceEdit::SourceEdit(const QFont &font, QWidget *parent, int bgColorValue) {
   loadAction = new QAction("Load C++ File", this);
   saveAction = new QAction("Save Source Code", this);
   aboutAction = new QAction("About Cutter++", this);
-  connect(runcodeAction, &QAction::triggered, this, &SourceEdit::onRunCode);
+  connect(runcodeAction, &QAction::triggered, parent,
+          &CutterPlusPlusPluginWidget::onRunCode);
+  connect(loadAction, &QAction::triggered, parent,
+          &CutterPlusPlusPluginWidget::onRunCode);
+  connect(saveAction, &QAction::triggered, parent,
+          &CutterPlusPlusPluginWidget::onRunCode);
+  connect(aboutAction, &QAction::triggered, parent,
+          &CutterPlusPlusPluginWidget::onRunCode);
 
   QPoint Point(0, 0);
   QTextCursor start = cursorForPosition(Point);
@@ -41,6 +52,12 @@ SourceEdit::SourceEdit(const QFont &font, QWidget *parent, int bgColorValue) {
                                                   : config.lightSyntaxColors()
                                             : config.customSyntaxColors());
   setHighlighter(highlighter);
+  appendPlainText(R"(#include <cutter/core/Cutter.h>
+
+void main() {
+    Core()->message("Hello, Cutter++.");
+}
+)");
 }
 
 void SourceEdit::showCustomContextMenu(const QPoint &pt) {
@@ -53,8 +70,3 @@ void SourceEdit::showCustomContextMenu(const QPoint &pt) {
   menu.addAction(aboutAction);
   menu.exec(mapToGlobal(pt));
 }
-
-void SourceEdit::onRunCode() {}
-void SourceEdit::onLoad() {}
-void SourceEdit::onSave() {}
-void SourceEdit::onAbout() {}

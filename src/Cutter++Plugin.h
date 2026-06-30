@@ -35,12 +35,20 @@ public:
 private:
   void initFeatherPad(const QFont &font);
   void updateTitle(const QString &title);
+  QString saveCode();
 
-private:
-  SourceEdit *sourceEdit;
+public slots:
+  void onRunCode();
+  void onLoad();
+  void onSave();
+  void onAbout();
 
 private slots:
   void formatOnBlockChange(int) const;
   void formatOnTextChange(int, int charsRemoved, int charsAdded) const;
   void formatTextRect() const;
+
+private:
+  SourceEdit *sourceEdit;
+  QString sourcePath;
 };

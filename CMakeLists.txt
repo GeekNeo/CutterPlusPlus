@@ -17,6 +17,8 @@ add_library(Cutter++ MODULE
     src/Cutter++Plugin.cpp
     src/SourceEdit.h
     src/SourceEdit.cpp
+    src/ICPPExec.h
+    src/ICPPExec.cpp
 
     ${FeatherPad}/config.cpp
     ${FeatherPad}/textedit.cpp
