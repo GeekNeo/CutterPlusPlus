@@ -1,0 +1,3 @@
+[submodule "third/FeatherPad"]
+	path = third/FeatherPad
+	url = https://github.com/tsujan/FeatherPad.git

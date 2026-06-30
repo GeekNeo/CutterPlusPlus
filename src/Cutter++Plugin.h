@@ -5,9 +5,9 @@
 
 #pragma once
 
-#include <QLabel>
-
 #include <CutterPlugin.h>
+
+class SourceEdit;
 
 class CutterPlusPlusPlugin : public QObject, CutterPlugin {
   Q_OBJECT
@@ -33,9 +33,14 @@ public:
   explicit CutterPlusPlusPluginWidget(MainWindow *main);
 
 private:
-  QLabel *text;
+  void initFeatherPad(const QFont &font);
+  void updateTitle(const QString &title);
+
+private:
+  SourceEdit *sourceEdit;
 
 private slots:
-  void on_seekChanged(RVA addr);
-  void on_buttonClicked();
+  void formatOnBlockChange(int) const;
+  void formatOnTextChange(int, int charsRemoved, int charsAdded) const;
+  void formatTextRect() const;
 };

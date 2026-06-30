@@ -4,16 +4,13 @@
 /* See LICENSE file in the root directory for full license text. */
 
 #include "Cutter++Plugin.h"
-
-#include <QAction>
-#include <QHBoxLayout>
-#include <QLabel>
-#include <QPushButton>
+#include "SourceEdit.h"
 
 #include <MainWindow.h>
+#include <QTimer>
 #include <common/Configuration.h>
 #include <common/TempConfig.h>
-#include <rz_core.h>
+#include <featherpad/highlighter/highlighter.h>
 
 void CutterPlusPlusPlugin::setupPlugin() {}
 
@@ -25,48 +22,65 @@ void CutterPlusPlusPlugin::setupInterface(MainWindow *main) {
 CutterPlusPlusPluginWidget::CutterPlusPlusPluginWidget(MainWindow *main)
     : CutterDockWidget(main) {
   this->setObjectName("CutterPlusPlusPluginWidget");
-  this->setWindowTitle("Cutter++");
-  QWidget *content = new QWidget();
-  this->setWidget(content);
 
-  QVBoxLayout *layout = new QVBoxLayout(content);
-  content->setLayout(layout);
-  text = new QLabel(content);
-  text->setFont(Config()->getFont());
-  text->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
-  layout->addWidget(text);
-
-  QPushButton *button = new QPushButton(content);
-  button->setText("Want a fortune?");
-  button->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
-  button->setMaximumHeight(50);
-  button->setMaximumWidth(200);
-  layout->addWidget(button);
-  layout->setAlignment(button, Qt::AlignHCenter);
-
-  connect(Core(), &CutterCore::seekChanged, this,
-          &CutterPlusPlusPluginWidget::on_seekChanged);
-  connect(button, &QPushButton::clicked, this,
-          &CutterPlusPlusPluginWidget::on_buttonClicked);
+  updateTitle("Anonymous");
+  initFeatherPad(Config()->getFont());
 }
 
-void CutterPlusPlusPluginWidget::on_seekChanged(RVA addr) {
-  Q_UNUSED(addr);
-  RzCoreLocked core(Core());
-  TempConfig tempConfig;
-  tempConfig.set("scr.color", 0);
-  QString disasm = Core()->disassembleSingleInstruction(Core()->getOffset());
-  QString res =
-      fromOwnedCharPtr(rz_core_clippy(core, disasm.toUtf8().constData()));
-  text->setText(res);
+void CutterPlusPlusPluginWidget::updateTitle(const QString &title) {
+  this->setWindowTitle(QString("Cutter++ - ") + title);
 }
 
-void CutterPlusPlusPluginWidget::on_buttonClicked() {
-  RzCoreLocked core(Core());
-  auto fortune = fromOwned(rz_core_fortune_get_random(core));
-  if (!fortune) {
-    return;
+void CutterPlusPlusPluginWidget::initFeatherPad(const QFont &font) {
+  sourceEdit = new SourceEdit(font, this);
+  this->setWidget(sourceEdit);
+
+  /* visible text may change on block removal */
+  connect(sourceEdit, &QPlainTextEdit::blockCountChanged, this,
+          &CutterPlusPlusPluginWidget::formatOnBlockChange);
+  connect(sourceEdit, &FeatherPad::TextEdit::updateRect, this,
+          &CutterPlusPlusPluginWidget::formatTextRect);
+  connect(sourceEdit, &FeatherPad::TextEdit::resized, this,
+          &CutterPlusPlusPluginWidget::formatTextRect);
+  /* this is needed when the whole visible text is pasted */
+  connect(sourceEdit->document(), &QTextDocument::contentsChange, this,
+          &CutterPlusPlusPluginWidget::formatOnTextChange);
+}
+
+void CutterPlusPlusPluginWidget::formatOnTextChange(int /*position*/,
+                                                    int charsRemoved,
+                                                    int charsAdded) const {
+  if (charsRemoved > 0 || charsAdded > 0) {
+    /* wait until the document's layout manager is notified about the change;
+       otherwise, the end cursor might be out of range in formatTextRect() */
+    QTimer::singleShot(0, this, &CutterPlusPlusPluginWidget::formatTextRect);
   }
-  QString res = fromOwnedCharPtr(rz_core_clippy(core, fortune.get()));
-  text->setText(res);
+}
+
+void CutterPlusPlusPluginWidget::formatOnBlockChange(
+    int /* newBlockCount*/) const {
+  formatTextRect();
+}
+
+void CutterPlusPlusPluginWidget::formatTextRect() const {
+  FeatherPad::Highlighter *highlighter =
+      qobject_cast<FeatherPad::Highlighter *>(sourceEdit->getHighlighter());
+  if (highlighter == nullptr)
+    return;
+
+  QPoint Point(0, 0);
+  QTextCursor start = sourceEdit->cursorForPosition(Point);
+  Point = QPoint(sourceEdit->width(), sourceEdit->height());
+  QTextCursor end = sourceEdit->cursorForPosition(Point);
+
+  highlighter->setLimit(start, end);
+  QTextBlock block = start.block();
+  while (block.isValid() && block.blockNumber() <= end.blockNumber()) {
+    if (FeatherPad::TextBlockData *data =
+            static_cast<FeatherPad::TextBlockData *>(block.userData())) {
+      if (!data->isHighlighted()) // isn't highlighted (completely)
+        highlighter->rehighlightBlock(block);
+    }
+    block = block.next();
+  }
 }
