@@ -5,13 +5,11 @@
 
 #pragma once
 
-#include <QString>
+#include <QDialog>
 
-namespace cpp {
+class AboutDialog : public QDialog {
+  Q_OBJECT
 
-QString getCurrentPluginFullPath();
-QString getTempSourcePath();
-QString loadFileString(const QString &path);
-bool saveFileString(const QString &path, const QString &strs);
-
-} // namespace cpp
+public:
+  explicit AboutDialog(QWidget *parent = nullptr);
+};

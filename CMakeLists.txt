@@ -22,6 +22,8 @@ add_library(Cutter++ MODULE
     src/ICPPExec.cpp
     src/Utilities.h
     src/Utilities.cpp
+    src/AboutDialog.h
+    src/AboutDialog.cpp
 
     ${FeatherPad}/config.cpp
     ${FeatherPad}/textedit.cpp

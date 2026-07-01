@@ -3,6 +3,7 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later */
 /* See LICENSE file in the root directory for full license text. */
 
+#include "AboutDialog.h"
 #include "Cutter++Plugin.h"
 #include "ICPPExec.h"
 #include "SourceEdit.h"
@@ -10,6 +11,7 @@
 
 #include <MainWindow.h>
 #include <QDir>
+#include <QFileDialog>
 #include <QProcess>
 #include <QTimer>
 #include <common/Configuration.h>
@@ -120,8 +122,36 @@ void CutterPlusPlusPluginWidget::onRunCode() {
     ICPPExec::inst()->runAsync(srcpath);
 }
 
-void CutterPlusPlusPluginWidget::onLoad() {}
+void CutterPlusPlusPluginWidget::onLoad() {
+  QString path = QFileDialog::getOpenFileName(
+      this, "Open C++ Source File", "",
+      "C++ Source Files (*.cpp *.cc);;All Files (*)");
+  if (path.isEmpty())
+    return;
 
-void CutterPlusPlusPluginWidget::onSave() {}
+  auto code = cpp::loadFileString(path);
+  if (code.length()) {
+    sourcePath = path;
+    sourceEdit->setPlainText(code);
+    updateTitle(QFileInfo(path).fileName());
+  }
+}
 
-void CutterPlusPlusPluginWidget::onAbout() {}
+void CutterPlusPlusPluginWidget::onSave() {
+  QString path =
+      QFileDialog::getSaveFileName(this, "Save C++ Source File", sourcePath,
+                                   "C++ Source Files (*.cpp *.cc)");
+  if (path.isEmpty())
+    return;
+
+  auto newname = sourcePath.isEmpty();
+  sourcePath = path;
+  saveCode();
+  updateTitle(QFileInfo(path).fileName());
+  Core()->message(QString("Saved %1.").arg(path));
+}
+
+void CutterPlusPlusPluginWidget::onAbout() {
+  AboutDialog dlg(this);
+  dlg.exec();
+}

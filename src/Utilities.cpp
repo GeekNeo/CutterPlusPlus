@@ -48,6 +48,17 @@ QString getTempSourcePath() {
   return QDir::tempPath() + QDir::separator() + "Cutter++.cc";
 }
 
+QString loadFileString(const QString &path) {
+  QFile file(path);
+  if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+    Core()->message(QString("Could not open file: ") + file.errorString());
+    return "";
+  }
+  QTextStream in(&file);
+  in.setEncoding(QStringConverter::Utf8);
+  return in.readAll();
+}
+
 bool saveFileString(const QString &path, const QString &strs) {
   QFile file(path);
   if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {

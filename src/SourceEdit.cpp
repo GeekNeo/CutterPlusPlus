@@ -30,11 +30,11 @@ SourceEdit::SourceEdit(const QFont &font, CutterPlusPlusPluginWidget *parent,
   connect(runcodeAction, &QAction::triggered, parent,
           &CutterPlusPlusPluginWidget::onRunCode);
   connect(loadAction, &QAction::triggered, parent,
-          &CutterPlusPlusPluginWidget::onRunCode);
+          &CutterPlusPlusPluginWidget::onLoad);
   connect(saveAction, &QAction::triggered, parent,
-          &CutterPlusPlusPluginWidget::onRunCode);
+          &CutterPlusPlusPluginWidget::onSave);
   connect(aboutAction, &QAction::triggered, parent,
-          &CutterPlusPlusPluginWidget::onRunCode);
+          &CutterPlusPlusPluginWidget::onAbout);
 
   QPoint Point(0, 0);
   QTextCursor start = cursorForPosition(Point);
