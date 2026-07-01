@@ -138,17 +138,20 @@ void CutterPlusPlusPluginWidget::onLoad() {
 }
 
 void CutterPlusPlusPluginWidget::onSave() {
-  QString path =
-      QFileDialog::getSaveFileName(this, "Save C++ Source File", sourcePath,
-                                   "C++ Source Files (*.cpp *.cc)");
-  if (path.isEmpty())
-    return;
+  if (sourcePath.isEmpty()) {
+    QString path =
+        QFileDialog::getSaveFileName(this, "Save C++ Source File", sourcePath,
+                                     "C++ Source Files (*.cpp *.cc)");
+    if (path.isEmpty())
+      return;
 
-  auto newname = sourcePath.isEmpty();
-  sourcePath = path;
+    auto newname = sourcePath.isEmpty();
+    sourcePath = path;
+    updateTitle(QFileInfo(path).fileName());
+  }
+
   saveCode();
-  updateTitle(QFileInfo(path).fileName());
-  Core()->message(QString("Saved %1.").arg(path));
+  Core()->message(QString("Saved %1.").arg(sourcePath));
 }
 
 void CutterPlusPlusPluginWidget::onAbout() {
