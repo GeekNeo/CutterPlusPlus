@@ -6,9 +6,11 @@
 #include "Cutter++Plugin.h"
 #include "ICPPExec.h"
 #include "SourceEdit.h"
+#include "Utilities.h"
 
 #include <MainWindow.h>
 #include <QDir>
+#include <QProcess>
 #include <QTimer>
 #include <common/Configuration.h>
 #include <common/TempConfig.h>
@@ -19,6 +21,26 @@ void CutterPlusPlusPlugin::setupPlugin() {}
 void CutterPlusPlusPlugin::setupInterface(MainWindow *main) {
   CutterPlusPlusPluginWidget *widget = new CutterPlusPlusPluginWidget(main);
   main->addPluginDockWidget(widget);
+
+  if (ICPPExec::inst()->init(cpp::getCurrentPluginFullPath())) {
+    QStringList args;
+    args << "--version";
+
+    auto proc = new QProcess;
+    proc->setProcessChannelMode(QProcess::MergedChannels);
+    proc->start(ICPPExec::inst()->executable(), args);
+    connect(
+        proc, qOverload<int, QProcess::ExitStatus>(&QProcess::finished), this,
+        [proc](int exitCode, QProcess::ExitStatus exitStatus) {
+          if (exitStatus == QProcess::NormalExit && exitCode == 0)
+            Core()->message(
+                QString("++++++++++++++++++++++++\n%1++++++++++++++++++++++++")
+                    .arg(QString::fromUtf8(proc->readAllStandardOutput())));
+          proc->deleteLater();
+        });
+  } else {
+    Core()->message(QString("Failed to load ICPP execution engine..."));
+  }
 }
 
 CutterPlusPlusPluginWidget::CutterPlusPlusPluginWidget(MainWindow *main)
@@ -88,24 +110,14 @@ void CutterPlusPlusPluginWidget::formatTextRect() const {
 }
 
 QString CutterPlusPlusPluginWidget::saveCode() {
-  QString cursrc = sourcePath.isEmpty()
-                       ? (QDir::tempPath() + QDir::separator() + "Cutter++.cc")
-                       : sourcePath;
-  QFile file(cursrc);
-  if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-    Core()->message(QString("Could not open file for writing: ") +
-                    file.errorString());
-    return "";
-  }
-  QTextStream out(&file);
-  out << sourceEdit->toPlainText();
-  return cursrc;
+  QString cursrc = sourcePath.isEmpty() ? cpp::getTempSourcePath() : sourcePath;
+  return cpp::saveFileString(cursrc, sourceEdit->toPlainText()) ? cursrc : "";
 }
 
 void CutterPlusPlusPluginWidget::onRunCode() {
   QString srcpath = saveCode();
   if (srcpath.length())
-    ICPPExec::inst()->run(srcpath);
+    ICPPExec::inst()->runAsync(srcpath);
 }
 
 void CutterPlusPlusPluginWidget::onLoad() {}

@@ -9,11 +9,19 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QLibrary>
+#include <QThread>
 
 bool ICPPExec::init(const QString &plugin) {
+  if (icpp_exec)
+    return true;
+
   QFileInfo finfo(plugin);
+  auto pkgdir = finfo.absolutePath() + QDir::separator() + "Cutter++";
+  // Cutter++/icpp/bin
+  auto icppdir =
+      pkgdir + QDir::separator() + "icpp" + QDir::separator() + "/bin";
   // parse icpp_exec api
-  QLibrary libicpp(finfo.absolutePath() + QDir::separator() + "icpp.19");
+  QLibrary libicpp(icppdir + QDir::separator() + "icpp.19");
   if (!libicpp.load())
     return false;
   icpp_exec = (icpp_exec_func_t)libicpp.resolve("icpp_exec");
@@ -21,7 +29,7 @@ bool ICPPExec::init(const QString &plugin) {
     return false;
 
   // compose the main icpp executable
-  QString icppexe = finfo.absolutePath() + QDir::separator() + "icpp";
+  QString icppexe = icppdir + QDir::separator() + "icpp";
 #ifdef Q_OS_WIN
   icppexe += ".exe";
 #endif
@@ -33,6 +41,14 @@ bool ICPPExec::init(const QString &plugin) {
 #error Unimplemented.
 #elif defined(Q_OS_MACOS)
   include(exeDir + "/../Resources/include");
+  include(exeDir + "/../Resources/include/cutter");
+  include(exeDir + "/../Resources/include/cutter/core");
+  include(exeDir + "/../Resources/include/librz");
+  include(exeDir + "/../Resources/include/librz/sdb");
+  include(pkgdir + "/include");
+  include(pkgdir + "/qtcore");
+  include(pkgdir + "/qtgui");
+  include(pkgdir + "/qtwidgets");
 #elif defined(Q_OS_LINUX)
 #error Unimplemented.
 #else
@@ -47,7 +63,23 @@ void ICPPExec::include(const QString &dir) {
 
 void ICPPExec::optLevel(const QString &optval) { opt = optval.toStdString(); }
 
-int ICPPExec::run(const QString &path) {
+void ICPPExec::runAsync(const QString &path) {
+  if (!icpp_exec)
+    return;
+
+  auto strpath = path.toStdString();
+  QThread *thread = QThread::create([this, strpath]() {
+    std::vector<const char *> incs;
+    for (auto &i : hdrIncs)
+      incs.push_back(i.data());
+    icpp_exec(icpp.data(), strpath.data(), opt.data(), &incs[0],
+              static_cast<int>(incs.size()));
+  });
+  QThread::connect(thread, &QThread::finished, thread, &QThread::deleteLater);
+  thread->start();
+}
+
+int ICPPExec::runSync(const QString &path) {
   if (!icpp_exec)
     return -1;
 

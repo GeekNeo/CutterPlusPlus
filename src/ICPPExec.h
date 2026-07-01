@@ -25,10 +25,13 @@ public:
     return &_inst;
   }
 
+  const char *executable() { return icpp.data(); }
+
   bool init(const QString &plugin);
   void include(const QString &dir);
   void optLevel(const QString &optval);
-  int run(const QString &path);
+  void runAsync(const QString &path);
+  int runSync(const QString &path);
 
 private:
   ICPPExec() {}

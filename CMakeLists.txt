@@ -13,12 +13,15 @@ set(CMAKE_AUTOMOC ON)
 set(FeatherPad third/FeatherPad/featherpad)
 
 add_library(Cutter++ MODULE
+    src/Cutter++.cpp
     src/Cutter++Plugin.h
     src/Cutter++Plugin.cpp
     src/SourceEdit.h
     src/SourceEdit.cpp
     src/ICPPExec.h
     src/ICPPExec.cpp
+    src/Utilities.h
+    src/Utilities.cpp
 
     ${FeatherPad}/config.cpp
     ${FeatherPad}/textedit.cpp
@@ -47,6 +50,7 @@ add_library(Cutter++ MODULE
 )
 set_target_properties(Cutter++ PROPERTIES PREFIX "")
 target_include_directories(Cutter++ PRIVATE 
+    include
     third/FeatherPad
 )
 target_link_libraries(Cutter++ PRIVATE Cutter::Cutter Rizin::Core)

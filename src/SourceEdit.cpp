@@ -53,9 +53,12 @@ SourceEdit::SourceEdit(const QFont &font, CutterPlusPlusPluginWidget *parent,
                                             : config.customSyntaxColors());
   setHighlighter(highlighter);
   appendPlainText(R"(#include <cutter/core/Cutter.h>
+#include <Cutter++.h>
 
-void main() {
-    Core()->message("Hello, Cutter++.");
+int main() {
+    Core()->message("Hello, Cutter.");
+    cpp::print("Hello, Cutter++.");
+    return 0;
 }
 )");
 }
