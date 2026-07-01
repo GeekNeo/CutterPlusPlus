@@ -27,6 +27,9 @@ bool ICPPExec::init(const QString &plugin) {
   icpp_exec = (icpp_exec_func_t)libicpp.resolve("icpp_exec");
   if (!icpp_exec)
     return false;
+  icpp_reglib = (icpp_reglib_func_t)libicpp.resolve("icpp_reglib");
+  if (!icpp_reglib)
+    return false;
 
   // compose the main icpp executable
   QString icppexe = icppdir + QDir::separator() + "icpp";
@@ -34,6 +37,12 @@ bool ICPPExec::init(const QString &plugin) {
   icppexe += ".exe";
 #endif
   icpp = icppexe.toStdString();
+
+  // initialize icpp execution engine
+  icpp_exec(icpp.data(), nullptr, nullptr, nullptr, 0);
+  // register our Cutter++ apis
+  if (!registerLibrary(plugin))
+    return false;
 
   // parse Cutter's include directory
   QString exeDir = QCoreApplication::applicationDirPath();
@@ -89,4 +98,12 @@ int ICPPExec::runSync(const QString &path) {
     incs.push_back(i.data());
   return icpp_exec(icpp.data(), strpath.data(), opt.data(), &incs[0],
                    static_cast<int>(incs.size()));
+}
+
+bool ICPPExec::registerLibrary(const QString &path) {
+  if (!icpp_reglib)
+    return false;
+
+  auto strpath = path.toStdString();
+  return icpp_reglib(strpath.data());
 }

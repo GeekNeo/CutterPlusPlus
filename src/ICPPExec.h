@@ -17,6 +17,11 @@ array of C++ header search argument like -I/path/to/include.
 typedef int (*icpp_exec_func_t)(const char *icpp, const char *path,
                                 const char *opt, const char **incptr,
                                 int incnum);
+/*
+Register a runtime library @path to icpp core engine so that scripts can call
+its symbols.
+*/
+typedef bool (*icpp_reglib_func_t)(const char *path);
 
 class ICPPExec {
 public:
@@ -30,14 +35,17 @@ public:
   bool init(const QString &plugin);
   void include(const QString &dir);
   void optLevel(const QString &optval);
+
   void runAsync(const QString &path);
   int runSync(const QString &path);
+  bool registerLibrary(const QString &path);
 
 private:
   ICPPExec() {}
   ~ICPPExec() {}
 
   icpp_exec_func_t icpp_exec = nullptr;
+  icpp_reglib_func_t icpp_reglib = nullptr;
   std::string icpp;
   std::string opt = "-O2";
   std::vector<std::string> hdrIncs;
