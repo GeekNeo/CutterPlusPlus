@@ -22,8 +22,10 @@ bool ICPPExec::init(const QString &plugin) {
       pkgdir + QDir::separator() + "icpp" + QDir::separator() + "bin";
   // parse icpp_exec api
   auto icpplib = icppdir + QDir::separator() + "icpp";
-#ifndef Q_OS_WIN
-  icpplib += ".19";
+#if defined(Q_OS_MACOS)
+  icpplib += ".19"; // let QLibrary handle the dylib extension
+#elif defined(Q_OS_LINUX)
+  icpplib += ".so.19";
 #endif
   QLibrary libicpp(icpplib);
   if (!libicpp.load())
@@ -63,7 +65,11 @@ bool ICPPExec::init(const QString &plugin) {
   include(exeDir + "/../Resources/include/librz");
   include(exeDir + "/../Resources/include/librz/sdb");
 #elif defined(Q_OS_LINUX)
-#error Unimplemented.
+  include(exeDir + "/../include");
+  include(exeDir + "/../include/cutter");
+  include(exeDir + "/../include/cutter/core");
+  include(exeDir + "/../include/librz");
+  include(exeDir + "/../include/librz/sdb");
 #else
 #error Unsupported OS platform.
 #endif

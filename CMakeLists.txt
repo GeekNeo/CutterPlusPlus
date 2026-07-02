@@ -9,6 +9,14 @@ set(CUTTER_INSTALL_PLUGDIR "${Cutter_USER_PLUGINDIR}" CACHE STRING "Directory to
 
 set(CMAKE_AUTOMOC ON)
 
+# Use $ORIGIN to point to the directories relative to the binary
+if(UNIX AND NOT APPLE)
+    set(CMAKE_SKIP_BUILD_RPATH FALSE)
+    set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+    set(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
+    set(CMAKE_INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib")
+endif()
+
 # FeatherPad for C++ code highlighter
 set(FeatherPad third/FeatherPad/featherpad)
 
