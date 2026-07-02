@@ -13,6 +13,7 @@ set(CMAKE_AUTOMOC ON)
 set(FeatherPad third/FeatherPad/featherpad)
 
 add_library(Cutter++ MODULE
+    include/Cutter++.h
     src/Cutter++.cpp
     src/Cutter++Plugin.h
     src/Cutter++Plugin.cpp

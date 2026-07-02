@@ -6,3 +6,4 @@ Instead of writing Python scripts or compiling native plugins, you can write and
 Powered by [ICPP](https://github.com/vpand/icpp), Cutter++ turns C++ into a scripting language for reverse engineering.
 
 ![Screenshot](https://raw.githubusercontent.com/GeekNeo/CutterPlusPlus/main/doc/ScreenShot.png)
+![ScreenshotWin](https://raw.githubusercontent.com/GeekNeo/CutterPlusPlus/main/doc/ScreenShotWin.png)

@@ -5,6 +5,7 @@
 
 #include "Utilities.h"
 
+#include <Cutter++.h>
 #include <QDir>
 #include <core/Cutter.h>
 
@@ -15,7 +16,7 @@
 #endif
 
 // A dummy anchor function used exclusively to sample a local memory address
-extern "C" void CUTTER_EXPORT cutter_plus_plus() {}
+extern "C" void __CPP_EXPORT__ cutter_plus_plus() {}
 
 namespace cpp {
 

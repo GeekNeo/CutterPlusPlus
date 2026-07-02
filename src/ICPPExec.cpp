@@ -19,9 +19,13 @@ bool ICPPExec::init(const QString &plugin) {
   auto pkgdir = finfo.absolutePath() + QDir::separator() + "Cutter++";
   // Cutter++/icpp/bin
   auto icppdir =
-      pkgdir + QDir::separator() + "icpp" + QDir::separator() + "/bin";
+      pkgdir + QDir::separator() + "icpp" + QDir::separator() + "bin";
   // parse icpp_exec api
-  QLibrary libicpp(icppdir + QDir::separator() + "icpp.19");
+  auto icpplib = icppdir + QDir::separator() + "icpp";
+#ifndef Q_OS_WIN
+  icpplib += ".19";
+#endif
+  QLibrary libicpp(icpplib);
   if (!libicpp.load())
     return false;
   icpp_exec = (icpp_exec_func_t)libicpp.resolve("icpp_exec");
@@ -47,22 +51,27 @@ bool ICPPExec::init(const QString &plugin) {
   // parse Cutter's include directory
   QString exeDir = QCoreApplication::applicationDirPath();
 #if defined(Q_OS_WIN)
-#error Unimplemented.
+  include(exeDir + "\\include");
+  include(exeDir + "\\include\\cutter");
+  include(exeDir + "\\include\\cutter\\core");
+  include(exeDir + "\\include\\librz");
+  include(exeDir + "\\include\\librz\\sdb");
 #elif defined(Q_OS_MACOS)
   include(exeDir + "/../Resources/include");
   include(exeDir + "/../Resources/include/cutter");
   include(exeDir + "/../Resources/include/cutter/core");
   include(exeDir + "/../Resources/include/librz");
   include(exeDir + "/../Resources/include/librz/sdb");
-  include(pkgdir + "/include");
-  include(pkgdir + "/qtcore");
-  include(pkgdir + "/qtgui");
-  include(pkgdir + "/qtwidgets");
 #elif defined(Q_OS_LINUX)
 #error Unimplemented.
 #else
 #error Unsupported OS platform.
 #endif
+  include(pkgdir);
+  include(pkgdir + QDir::separator() + "include");
+  include(pkgdir + QDir::separator() + "QtCore");
+  include(pkgdir + QDir::separator() + "QtGui");
+  include(pkgdir + QDir::separator() + "QtWidgets");
   return true;
 }
 
