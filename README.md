@@ -7,10 +7,10 @@ Powered by [ICPP](https://github.com/vpand/icpp), Cutter++ turns C++ into a scri
 
 ## Screenshot
 ### Windows
-![ScreenshotWin](https://raw.githubusercontent.com/GeekNeo/CutterPlusPlus/main/doc/ScreenShotWin.png)
+![ScreenshotWin](https://raw.githubusercontent.com/GeekNeo/CutterPlusPlus/main/doc/ScreenshotWin.png)
 
 ### macOS
-![Screenshot](https://raw.githubusercontent.com/GeekNeo/CutterPlusPlus/main/doc/ScreenShot.png)
+![ScreenshotMac](https://raw.githubusercontent.com/GeekNeo/CutterPlusPlus/main/doc/ScreenshotMac.png)
 
 ### Linux/Ubuntu
-![ScreenshotLinux](https://raw.githubusercontent.com/GeekNeo/CutterPlusPlus/main/doc/ScreenShotLinux.png)
+![ScreenshotLinux](https://raw.githubusercontent.com/GeekNeo/CutterPlusPlus/main/doc/ScreenshotLinux.png)
