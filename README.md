@@ -16,6 +16,10 @@ Powered by [ICPP](https://github.com/vpand/icpp), Cutter++ turns C++ into a scri
 ![ScreenshotLinux](https://raw.githubusercontent.com/GeekNeo/CutterPlusPlus/main/doc/ScreenshotLinux.png)
 
 ## Install
+### Windows
+```sh
+mklink C:\Users\%USERNAME%\AppData\Roaming\rizin\cutter\plugins\native\Cutter++.dll DRIVE:\path\to\Cutter++.dll
+```
 ### Linux/Ubuntu
 ```sh
 ln -s -f /path/to/cutter++-xxx/Cutter++.so ~/.local/share/rizin/cutter/plugins/native
