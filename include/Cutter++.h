@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include <cstdint>
+
 #if defined(_WIN32) || defined(_WIN64)
 #define __CPP_EXPORT__ __declspec(dllexport)
 #else
@@ -12,6 +14,11 @@
 #endif // end of _WIN
 
 namespace cpp {
+
+// Cutter++ version.
+constexpr const std::uint8_t version_major = 0;
+constexpr const std::uint8_t version_minor = 1;
+constexpr const std::uint8_t version_patch = 0;
 
 // print log to Cutter's Console
 __CPP_EXPORT__ void print(const char *format, ...);

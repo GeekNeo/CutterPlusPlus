@@ -9,6 +9,7 @@
 #include "SourceEdit.h"
 #include "Utilities.h"
 
+#include <Cutter++.h>
 #include <MainWindow.h>
 #include <QDir>
 #include <QFileDialog>
@@ -43,6 +44,13 @@ void CutterPlusPlusPlugin::setupInterface(MainWindow *main) {
   } else {
     Core()->message(QString("Failed to load ICPP execution engine..."));
   }
+}
+
+QString CutterPlusPlusPlugin::getVersion() const {
+  return QString("%1.%2.%3")
+      .arg(cpp::version_major)
+      .arg(cpp::version_minor)
+      .arg(cpp::version_patch);
 }
 
 CutterPlusPlusPluginWidget::CutterPlusPlusPluginWidget(MainWindow *main)

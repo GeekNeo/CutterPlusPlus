@@ -23,7 +23,7 @@ public:
   QString getDescription() const override {
     return "Interactive Modern C++ for Binary Analysis.";
   }
-  QString getVersion() const override { return "0.1.0"; }
+  QString getVersion() const override;
 };
 
 class CutterPlusPlusPluginWidget : public CutterDockWidget {
