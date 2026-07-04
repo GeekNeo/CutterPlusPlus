@@ -25,7 +25,7 @@ The goal is not to replace Python.
 
 The goal is to make modern C++ a first-class language for binary analysis.
 
-# Who is this for?
+## Who is this for?
  * Reverse engineers
  * Malware analysts
  * Security researchers
@@ -167,6 +167,46 @@ The newly built naked Cutter++ needs the ICPP and Qt related stuff to work. The 
 ------QtCore          ; QtCore headers
 ------QtGui           ; QtGui headers
 ------QtWidgets       ; QtWidgets headers
+```
+
+## API
+### Implemented
+```c++
+// C style print log to Cutter's Console
+void print(const char *format, ...);
+
+// execute a snippet code, it will automatically wrap in a main function and add
+// basic Cutter's headers
+int exec(const char *snippet);
+
+// execute a source file
+int exec_file(const char *path);
+```
+
+### Future Planned
+```sh
+currentBinary()
+currentFunction()
+currentAddress()
+functions()
+imports()
+exports()
+strings()
+sections()
+segments()
+comments()
+xrefs()
+graph()
+disassemble()
+decompile()
+patch()
+```
+```c++
+auto suspicious = cpp::functions()
+  | std::views::filter(is_obfuscated)
+  | std::views::transform(&Function::name);
+for (auto &name : suspicious)
+  cpp::print("Suspicious function %s", name.data());
 ```
 
 ## Issue
