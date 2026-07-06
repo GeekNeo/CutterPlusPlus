@@ -73,3 +73,15 @@ void SourceEdit::showCustomContextMenu(const QPoint &pt) {
   menu.addAction(aboutAction);
   menu.exec(mapToGlobal(pt));
 }
+
+bool SourceEdit::event(QEvent *event) {
+#if defined(Q_OS_MACOS)
+  if (event && event->type() == QEvent::InputMethodQuery) {
+    // prevent a crash on macOS
+    event->accept();
+    return true;
+  }
+#endif
+
+  return FeatherPad::TextEdit::event(event);
+}

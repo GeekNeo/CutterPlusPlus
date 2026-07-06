@@ -18,7 +18,7 @@ namespace cpp {
 // Cutter++ version.
 constexpr const std::uint8_t version_major = 0;
 constexpr const std::uint8_t version_minor = 1;
-constexpr const std::uint8_t version_patch = 0;
+constexpr const std::uint8_t version_patch = 1;
 
 // print log to Cutter's Console
 __CPP_EXPORT__ void print(const char *format, ...);

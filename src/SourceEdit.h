@@ -18,6 +18,9 @@ public:
              int bgColorValue = 255);
   virtual ~SourceEdit() {}
 
+protected:
+  bool event(QEvent *event) override;
+
 private slots:
   void showCustomContextMenu(const QPoint &pt);
 
