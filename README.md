@@ -59,7 +59,46 @@ Today there are generally two options:
 
 **Cutter++ fills the gap by combining the convenience of scripting with the power of modern C++**.
 
-## Example
+## Snippet REPL
+### Directive
+Every snippet expression will be preset with the following directives:
+```c++
+#include <cutter/core/Cutter.h>
+#include <Cutter++.h>
+#include <icpp.hpp>
+import std;
+```
+You can type in your own directives, they start with (exclude the ' character)
+ * '#'
+ * 'typedef '
+ * 'using '
+ * 'namespace '
+ * 'import '
+ * extern "C"
+ e.g., include some other header file:
+```c++
+#include "/path/to/header.h"
+```
+### Expression
+You can type in any C++ expression, like calculation, function calling, etc..
+
+The following expression will update Cutter's Disassembly window to offset 0x8000:
+```c++
+Core()->seek(0x8000)
+```
+### How it works
+Each snippet will be wrapped as:
+```c++
+#include ...
+int main() {
+  expression;
+  return 0;
+}
+```
+
+## Full Script
+To run some complex script, you can write or load the full C++ script in the main editor:
+
 ### Hello World
 ```c++
 #include <cutter/core/Cutter.h>
@@ -147,7 +186,7 @@ Like native plugins, executed code has the same permissions as the running appli
 
 ## Build
 To build your own version of Cutter++, make sure all of the **prerequisites** are provided:
- * **CMake**;
+ * **CMake**: plus **Ninja** if you're building for Windows;
  * **Cutter**: official Cutter product already has included headers and cmakes, so we can use it straightforward;
  * **Qt**: you should install the Qt version which can be found in Cutter's about dialog;
 ```sh
@@ -155,7 +194,14 @@ git clone --recursive --depth=1 https://github.com/GeekNeo/CutterPlusPlus.git
 cd CutterPlusPlus
 mkdir build
 cd build
+
+# Windows (use RelWithDebInfo if you want to debug, Debug won't work because we'll be running in Cutter's Release runtime environment):
+vcvarsall x64
+cmake -DCMAKE_BUILD_TYPE=Release -G Ninja -DCMAKE_C_COMPILER=clang-cl -DCMAKE_CXX_COMPILER=clang-cl -DCMAKE_PREFIX_PATH="/path/to/Qt_DIR;/path/to/Cutter_DIR" ..
+
+# macOS and Linux:
 cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="/path/to/Qt_DIR;/path/to/Cutter_DIR" ..
+
 cmake --build . -- -j8
 ```
 The newly built naked Cutter++ needs the ICPP and Qt related stuff to work. The simplest way to run your own version is to replace the Cutter++.so/dll in the official release package, otherwise you should construct the following structure:

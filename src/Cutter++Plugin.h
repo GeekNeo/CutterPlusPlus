@@ -8,6 +8,7 @@
 #include <CutterPlugin.h>
 
 class SourceEdit;
+class SnippetEdit;
 
 class CutterPlusPlusPlugin : public QObject, CutterPlugin {
   Q_OBJECT
@@ -48,7 +49,16 @@ private slots:
   void formatOnTextChange(int, int charsRemoved, int charsAdded) const;
   void formatTextRect() const;
 
+  // snippet edit handlers
+  void onSnippetEnterPressed();
+  void onSnippetArrowPressed(int key);
+
 private:
   SourceEdit *sourceEdit;
+  SnippetEdit *snippetEdit;
   QString sourcePath;
+  QString snippetLast;
+  QStringList snippetHistory;
+  QStringList snippetDirectives;
+  int snippetCur = 0;
 };

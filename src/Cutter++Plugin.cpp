@@ -6,6 +6,7 @@
 #include "AboutDialog.h"
 #include "Cutter++Plugin.h"
 #include "ICPPExec.h"
+#include "SnippetEdit.h"
 #include "SourceEdit.h"
 #include "Utilities.h"
 
@@ -13,8 +14,12 @@
 #include <MainWindow.h>
 #include <QDir>
 #include <QFileDialog>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QLineEdit>
 #include <QProcess>
 #include <QTimer>
+#include <QVBoxLayout>
 #include <common/Configuration.h>
 #include <common/TempConfig.h>
 #include <featherpad/highlighter/highlighter.h>
@@ -59,6 +64,12 @@ CutterPlusPlusPluginWidget::CutterPlusPlusPluginWidget(MainWindow *main)
 
   updateTitle("Anonymous");
   initFeatherPad(Config()->getFont());
+
+  // preset ICPP, Cutter, and Cutter++ include directives
+  snippetDirectives.append("#include <cutter/core/Cutter.h>");
+  snippetDirectives.append("#include <Cutter++.h>");
+  snippetDirectives.append("#include <icpp.hpp>");
+  snippetDirectives.append("import std;");
 }
 
 void CutterPlusPlusPluginWidget::updateTitle(const QString &title) {
@@ -67,7 +78,34 @@ void CutterPlusPlusPluginWidget::updateTitle(const QString &title) {
 
 void CutterPlusPlusPluginWidget::initFeatherPad(const QFont &font) {
   sourceEdit = new SourceEdit(font, this);
-  this->setWidget(sourceEdit);
+  snippetEdit = new SnippetEdit(this);
+
+  /*
+  ----------------------------------------
+  |                                      |
+  |               Source Edit            |
+  |                                      |
+  ----------------------------------------
+  |C++ >> |      Snippet Edit            |
+  ----------------------------------------
+  */
+  auto *bottomLayout = new QHBoxLayout;
+  bottomLayout->addWidget(new QLabel(QStringLiteral("C++ >>>"), this));
+  bottomLayout->addWidget(snippetEdit);
+
+  auto *mainLayout = new QVBoxLayout;
+  mainLayout->addWidget(sourceEdit);
+  mainLayout->addLayout(bottomLayout);
+
+  auto *container = new QWidget(this);
+  container->setLayout(mainLayout);
+  this->setWidget(container);
+
+  // connect SnippetEdit signals
+  connect(snippetEdit, &SnippetEdit::enterPressed, this,
+          &CutterPlusPlusPluginWidget::onSnippetEnterPressed);
+  connect(snippetEdit, &SnippetEdit::arrowKeyPressed, this,
+          &CutterPlusPlusPluginWidget::onSnippetArrowPressed);
 
   /* visible text may change on block removal */
   connect(sourceEdit, &QPlainTextEdit::blockCountChanged, this,
@@ -119,6 +157,54 @@ void CutterPlusPlusPluginWidget::formatTextRect() const {
   }
 }
 
+void CutterPlusPlusPluginWidget::onSnippetEnterPressed() {
+  QString snippet = snippetEdit->text();
+  if (snippet.startsWith("#") || snippet.startsWith("typedef ") ||
+      snippet.startsWith("using ") || snippet.startsWith("namespace ") ||
+      snippet.startsWith(R"(extern "C")") || snippet.startsWith("import ")) {
+    // accumulated compiler directives, like #include, #define, etc.
+    if (snippet[0] != '#')
+      snippet += ";";
+    snippetDirectives.append(snippet);
+    Core()->message(QString("C++ >>> %1").arg(snippet));
+  } else {
+    QString dyncodes;
+    // the # prefixed compiler directives
+    for (auto &d : snippetDirectives)
+      dyncodes += d + "\n";
+    // the main entry
+    dyncodes += "int main(void) {" + snippet + ";return 0;}";
+    auto tmpsrc = cpp::getTempSourcePath();
+    if (snippetLast != dyncodes) {
+      cpp::saveFileString(tmpsrc, dyncodes);
+      snippetLast = dyncodes;
+      snippetHistory.append(snippet);
+    }
+    snippetCur = snippetHistory.size() - 2;
+    ICPPExec::inst()->runAsync(tmpsrc);
+  }
+  snippetEdit->clear();
+}
+
+void CutterPlusPlusPluginWidget::onSnippetArrowPressed(int key) {
+  switch (key) {
+  case Qt::Key_Up:
+    if (snippetCur < snippetHistory.size() - 1) {
+      snippetCur++;
+      snippetEdit->setText(snippetHistory[snippetCur]);
+    }
+    break;
+  case Qt::Key_Down:
+    if (snippetCur > 0) {
+      snippetCur--;
+      snippetEdit->setText(snippetHistory[snippetCur]);
+    }
+    break;
+  default:
+    break;
+  }
+}
+
 QString CutterPlusPlusPluginWidget::saveCode() {
   QString cursrc = sourcePath.isEmpty() ? cpp::getTempSourcePath() : sourcePath;
   return cpp::saveFileString(cursrc, sourceEdit->toPlainText()) ? cursrc : "";
@@ -153,7 +239,6 @@ void CutterPlusPlusPluginWidget::onSave() {
     if (path.isEmpty())
       return;
 
-    auto newname = sourcePath.isEmpty();
     sourcePath = path;
     updateTitle(QFileInfo(path).fileName());
   }

@@ -27,6 +27,8 @@ add_library(Cutter++ MODULE
     src/Cutter++Plugin.cpp
     src/SourceEdit.h
     src/SourceEdit.cpp
+    src/SnippetEdit.h
+    src/SnippetEdit.cpp
     src/ICPPExec.h
     src/ICPPExec.cpp
     src/Utilities.h
