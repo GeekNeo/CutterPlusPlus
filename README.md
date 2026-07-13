@@ -66,7 +66,6 @@ Every snippet expression will be preset with the following directives:
 #include <cutter/core/Cutter.h>
 #include <Cutter++.h>
 #include <icpp.hpp>
-import std;
 ```
 You can type in your own directives, they start with (exclude the ' character)
  * '#'

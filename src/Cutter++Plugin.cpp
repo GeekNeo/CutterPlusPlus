@@ -69,7 +69,6 @@ CutterPlusPlusPluginWidget::CutterPlusPlusPluginWidget(MainWindow *main)
   snippetDirectives.append("#include <cutter/core/Cutter.h>");
   snippetDirectives.append("#include <Cutter++.h>");
   snippetDirectives.append("#include <icpp.hpp>");
-  snippetDirectives.append("import std;");
 }
 
 void CutterPlusPlusPluginWidget::updateTitle(const QString &title) {
