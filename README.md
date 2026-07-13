@@ -77,20 +77,20 @@ You can type in your own directives, they start with (exclude the ' character)
 
  e.g., include some other header file so we can call its definitions:
 ```c++
-#include "/path/to/header.h"
+C++ >>> #include "/path/to/header.h"
 ```
 ```c++
-api_in_header()
+C++ >>> api_in_header()
 ```
 ### Expression
 You can type in any C++ expression, like calculation, function calling, etc..
 
 The following expression will update Cutter's Disassembly window to offset 0x8000:
 ```c++
-Core()->seek(0x8000)
+C++ >>> Core()->seek(0x8000)
 ```
 ### How it works
-Each snippet will be wrapped as:
+Each snippet will be automatically wrapped as:
 ```c++
 #include ...
 int main() {
