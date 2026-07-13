@@ -74,9 +74,13 @@ You can type in your own directives, they start with (exclude the ' character)
  * 'namespace '
  * 'import '
  * extern "C"
- e.g., include some other header file:
+
+ e.g., include some other header file so we can call its definitions:
 ```c++
 #include "/path/to/header.h"
+```
+```c++
+api_in_header()
 ```
 ### Expression
 You can type in any C++ expression, like calculation, function calling, etc..
@@ -96,7 +100,7 @@ int main() {
 ```
 
 ## Full Script
-To run some complex script, you can write or load the full C++ script in the main editor:
+To run some complex scripts, you can write or load the full C++ script in the main editor:
 
 ### Hello World
 ```c++
@@ -186,7 +190,7 @@ Like native plugins, executed code has the same permissions as the running appli
 ## Build
 To build your own version of Cutter++, make sure all of the **prerequisites** are provided:
  * **CMake**: plus **Ninja** if you're building for Windows;
- * **Cutter**: official Cutter product already has included headers and cmakes, so we can use it straightforward;
+ * **Cutter**: the official Cutter package already has included the SDK headers and cmakes, so we can use it straightforward;
  * **Qt**: you should install the Qt version which can be found in Cutter's about dialog;
 ```sh
 git clone --recursive --depth=1 https://github.com/GeekNeo/CutterPlusPlus.git
@@ -262,4 +266,4 @@ If you have any questions or thoughts, just feel free to email to me:
 ```
 neoliu2011@gmail.com
 ```
-Any feedbacks are welcome.
+Any feedback is welcome.
