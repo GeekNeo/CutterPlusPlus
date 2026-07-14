@@ -34,4 +34,6 @@ int main() {%1; return 0;})")
 
 int exec_file(const char *path) { return ICPPExec::inst()->runSync(path); }
 
+void cpu_goto(uint64_t offset) { Core()->seek(offset); }
+
 } // namespace cpp

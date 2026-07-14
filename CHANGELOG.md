@@ -5,6 +5,7 @@
 ### Improvements:
  * add a snippet edit for C++ REPL;
  * use ninja to build on Windows; 
+ * add a new API: cpu_goto;
 
 ## v0.1.0
 Initial release.

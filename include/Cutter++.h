@@ -30,4 +30,7 @@ __CPP_EXPORT__ int exec(const char *snippet);
 // execute a source file
 __CPP_EXPORT__ int exec_file(const char *path);
 
+// jump to the new offset in Cutter's Disassembly window
+__CPP_EXPORT__ void cpu_goto(uint64_t offset);
+
 } // namespace cpp

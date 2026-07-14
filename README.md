@@ -230,6 +230,9 @@ int exec(const char *snippet);
 
 // execute a source file
 int exec_file(const char *path);
+
+// jump to the new offset in Cutter's Disassembly window
+void cpu_goto(uint64_t offset);
 ```
 
 ### Future Planned
