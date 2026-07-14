@@ -199,6 +199,8 @@ void CutterPlusPlusPluginWidget::onSnippetEnterPressed() {
         return;
       snippet = snippetHistory.last();
     }
+    Core()->message(QString("C++ >>> %1").arg(snippet));
+
     QString dyncodes;
     // the # prefixed compiler directives
     for (auto &d : snippetDirectives)

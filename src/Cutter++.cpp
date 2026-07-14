@@ -18,7 +18,7 @@ void print(const char *format, ...) {
   va_start(args, format);
   auto formatted = QString::vasprintf(format, args);
   va_end(args);
-  Core()->message(QString("[Cutter++] ") + formatted);
+  Core()->message(formatted);
 }
 
 int exec(const char *snippet) {
