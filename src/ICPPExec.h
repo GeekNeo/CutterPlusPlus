@@ -5,7 +5,9 @@
 
 #pragma once
 
+#include <QSettings>
 #include <QString>
+#include <QStringList>
 #include <string>
 #include <vector>
 
@@ -22,6 +24,8 @@ Register a runtime library @path to icpp core engine so that scripts can call
 its symbols.
 */
 typedef bool (*icpp_reglib_func_t)(const char *path);
+
+#define ICPP ICPPExec::inst()
 
 class ICPPExec {
 public:
@@ -40,9 +44,20 @@ public:
   int runSync(const QString &path);
   bool registerLibrary(const QString &path);
 
+  void set(const QString &key, const QString &val) {
+    settings.setValue(key, val);
+  }
+
+  QString get(const QString &key) { return settings.value(key).toString(); }
+
+  QStringList snippetConfigSaved;
+  int snippetCur = 0;
+
 private:
-  ICPPExec() {}
+  ICPPExec() : settings("Cutter", "Cutter++") {}
   ~ICPPExec() {}
+
+  QSettings settings;
 
   icpp_exec_func_t icpp_exec = nullptr;
   icpp_reglib_func_t icpp_reglib = nullptr;

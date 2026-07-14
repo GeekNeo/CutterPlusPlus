@@ -15,6 +15,7 @@
 #include <QDir>
 #include <QFileDialog>
 #include <QHBoxLayout>
+#include <QHash>
 #include <QLabel>
 #include <QLineEdit>
 #include <QProcess>
@@ -24,19 +25,43 @@
 #include <common/TempConfig.h>
 #include <featherpad/highlighter/highlighter.h>
 
-void CutterPlusPlusPlugin::setupPlugin() {}
+static const char *config_snippet_saved = "Cutter++.Snippets";
+
+void CutterPlusPlusPlugin::setupPlugin() {
+  // load saved snippets
+  auto cfgvalue = ICPP->get(config_snippet_saved);
+  if (cfgvalue.size()) {
+    ICPP->snippetConfigSaved = cfgvalue.split(';');
+    ICPP->snippetCur = ICPP->snippetConfigSaved.size();
+  }
+}
+
+void CutterPlusPlusPlugin::terminate() {
+  // save the last snippets
+  constexpr int max_snippet = 100;
+  auto totalsize = ICPP->snippetConfigSaved.size();
+  if (totalsize) {
+    auto starti = totalsize > max_snippet ? totalsize - max_snippet : 0;
+    QString cfgvalue;
+    for (auto i = starti; i < totalsize; i++) {
+      cfgvalue += ICPP->snippetConfigSaved[i] + ";";
+    }
+    cfgvalue.removeLast();
+    ICPP->set(config_snippet_saved, cfgvalue);
+  }
+}
 
 void CutterPlusPlusPlugin::setupInterface(MainWindow *main) {
   CutterPlusPlusPluginWidget *widget = new CutterPlusPlusPluginWidget(main);
   main->addPluginDockWidget(widget);
 
-  if (ICPPExec::inst()->init(cpp::getCurrentPluginFullPath())) {
+  if (ICPP->init(cpp::getCurrentPluginFullPath())) {
     QStringList args;
     args << "--version";
 
     auto proc = new QProcess;
     proc->setProcessChannelMode(QProcess::MergedChannels);
-    proc->start(ICPPExec::inst()->executable(), args);
+    proc->start(ICPP->executable(), args);
     connect(
         proc, qOverload<int, QProcess::ExitStatus>(&QProcess::finished), this,
         [proc](int exitCode, QProcess::ExitStatus exitStatus) {
@@ -165,38 +190,63 @@ void CutterPlusPlusPluginWidget::onSnippetEnterPressed() {
     if (snippet[0] != '#')
       snippet += ";";
     snippetDirectives.append(snippet);
+    ICPP->snippetConfigSaved.append(snippet);
     Core()->message(QString("C++ >>> %1").arg(snippet));
   } else {
+    if (!snippet.size()) {
+      // repeat the last snippet
+      if (!snippetHistory.size())
+        return;
+      snippet = snippetHistory.last();
+    }
     QString dyncodes;
     // the # prefixed compiler directives
     for (auto &d : snippetDirectives)
       dyncodes += d + "\n";
     // the main entry
     dyncodes += "int main(void) {" + snippet + ";return 0;}";
-    auto tmpsrc = cpp::getTempSourcePath();
-    if (snippetLast != dyncodes) {
-      cpp::saveFileString(tmpsrc, dyncodes);
-      snippetLast = dyncodes;
-      snippetHistory.append(snippet);
+
+    // firstly check the cache
+    auto hash = qHash(dyncodes);
+    auto found = snippetCache.find(hash);
+    if (found == snippetCache.end()) {
+      auto tmpsrc = QString("%1.%2.cc").arg(cpp::getTempSourcePath()).arg(hash);
+      // secondly check the script file
+      if (!QFileInfo(tmpsrc).exists()) {
+        // finally generate a fresh new script
+        cpp::saveFileString(tmpsrc, dyncodes);
+      }
+      found = snippetCache.insert(hash, tmpsrc);
+      // compile and run
+      ICPP->runAsync(found.value());
+    } else {
+      // run the io cache directly
+      ICPP->runSync(found.value());
     }
-    snippetCur = snippetHistory.size() - 2;
-    ICPPExec::inst()->runAsync(tmpsrc);
+    if (!snippetHistory.size() || snippetHistory.last() != snippet) {
+      snippetHistory.append(snippet);
+      ICPP->snippetConfigSaved.append(snippet);
+    }
   }
+  // reset the current snippet index
+  ICPP->snippetCur = ICPP->snippetConfigSaved.size();
   snippetEdit->clear();
 }
 
 void CutterPlusPlusPluginWidget::onSnippetArrowPressed(int key) {
+  auto &snippets = ICPP->snippetConfigSaved;
+  auto &current = ICPP->snippetCur;
   switch (key) {
   case Qt::Key_Up:
-    if (snippetCur < snippetHistory.size() - 1) {
-      snippetCur++;
-      snippetEdit->setText(snippetHistory[snippetCur]);
+    if (0 < current && current <= snippets.size()) {
+      current--;
+      snippetEdit->setText(snippets[current]);
     }
     break;
   case Qt::Key_Down:
-    if (snippetCur > 0) {
-      snippetCur--;
-      snippetEdit->setText(snippetHistory[snippetCur]);
+    if (0 <= current && current < snippets.size() - 1) {
+      current++;
+      snippetEdit->setText(snippets[current]);
     }
     break;
   default:
@@ -212,7 +262,7 @@ QString CutterPlusPlusPluginWidget::saveCode() {
 void CutterPlusPlusPluginWidget::onRunCode() {
   QString srcpath = saveCode();
   if (srcpath.length())
-    ICPPExec::inst()->runAsync(srcpath);
+    ICPP->runAsync(srcpath);
 }
 
 void CutterPlusPlusPluginWidget::onLoad() {

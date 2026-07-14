@@ -6,6 +6,7 @@
 #pragma once
 
 #include <CutterPlugin.h>
+#include <QMap>
 
 class SourceEdit;
 class SnippetEdit;
@@ -18,6 +19,7 @@ class CutterPlusPlusPlugin : public QObject, CutterPlugin {
 public:
   void setupPlugin() override;
   void setupInterface(MainWindow *main) override;
+  void terminate() override;
 
   QString getName() const override { return "Cutter++"; }
   QString getAuthor() const override { return "Jesse Liu"; }
@@ -32,6 +34,7 @@ class CutterPlusPlusPluginWidget : public CutterDockWidget {
 
 public:
   explicit CutterPlusPlusPluginWidget(MainWindow *main);
+  virtual ~CutterPlusPlusPluginWidget() {}
 
 private:
   void initFeatherPad(const QFont &font);
@@ -57,8 +60,10 @@ private:
   SourceEdit *sourceEdit;
   SnippetEdit *snippetEdit;
   QString sourcePath;
-  QString snippetLast;
+  // C++ expression history, like calculation, function calling
   QStringList snippetHistory;
+  // C++ directive history, like #include
   QStringList snippetDirectives;
-  int snippetCur = 0;
+  // <hash, script_path>, used to skip fresh compiling to accelerate the REPL
+  QMap<size_t, QString> snippetCache;
 };

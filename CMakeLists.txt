@@ -68,4 +68,17 @@ target_include_directories(Cutter++ PRIVATE
 )
 target_link_libraries(Cutter++ PRIVATE Cutter::Cutter Rizin::Core)
 
+if(WIN32)
+  # Make sure we can get the pdb file
+  if(CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
+    target_compile_options(Cutter++ PRIVATE
+      $<$<CONFIG:RelWithDebInfo>:/Zi>
+    )
+    target_link_options(Cutter++ PRIVATE
+      $<$<CONFIG:RelWithDebInfo>:/DEBUG>
+      $<$<CONFIG:RelWithDebInfo>:/PDB:${CMAKE_BINARY_DIR}/$<TARGET_NAME:Cutter++>.pdb>
+    )
+  endif()
+endif()
+
 install(TARGETS Cutter++ DESTINATION "${CUTTER_INSTALL_PLUGDIR}")
