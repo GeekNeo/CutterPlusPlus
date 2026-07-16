@@ -39,7 +39,11 @@ void cpu_goto(uint64_t offset) { Core()->seek(offset); }
 
 const char *current_file() {
   ICPP->currentFile = ICPP->mainWin->getFilename().toStdString();
-  return ICPP->currentFile.c_str();
+
+  int offset = 0;
+  if (ICPP->currentFile.starts_with("file://"))
+    offset = 7;
+  return ICPP->currentFile.c_str() + 7;
 }
 
 } // namespace cpp
