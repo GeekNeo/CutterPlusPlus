@@ -54,6 +54,7 @@ void CutterPlusPlusPlugin::terminate() {
 void CutterPlusPlusPlugin::setupInterface(MainWindow *main) {
   CutterPlusPlusPluginWidget *widget = new CutterPlusPlusPluginWidget(main);
   main->addPluginDockWidget(widget);
+  ICPP->mainWin = main;
 
   if (ICPP->init(cpp::getCurrentPluginFullPath())) {
     QStringList args;
@@ -189,8 +190,10 @@ void CutterPlusPlusPluginWidget::onSnippetEnterPressed() {
     // accumulated compiler directives, like #include, #define, etc.
     if (snippet[0] != '#')
       snippet += ";";
-    snippetDirectives.append(snippet);
-    ICPP->snippetConfigSaved.append(snippet);
+    if (!snippetDirectives.contains(snippet)) {
+      snippetDirectives.append(snippet);
+      ICPP->snippetConfigSaved.append(snippet);
+    }
     Core()->message(QString("C++ >>> %1").arg(snippet));
   } else {
     if (!snippet.size()) {
@@ -202,14 +205,17 @@ void CutterPlusPlusPluginWidget::onSnippetEnterPressed() {
     Core()->message(QString("C++ >>> %1").arg(snippet));
 
     QString dyncodes;
+    size_t hash = 0;
     // the # prefixed compiler directives
-    for (auto &d : snippetDirectives)
+    for (auto &d : snippetDirectives) {
       dyncodes += d + "\n";
+      hash ^= directiveHash(d);
+    }
     // the main entry
     dyncodes += "int main(void) {" + snippet + ";return 0;}";
+    hash ^= qHash(dyncodes);
 
     // firstly check the cache
-    auto hash = qHash(dyncodes);
     auto found = snippetCache.find(hash);
     if (found == snippetCache.end()) {
       auto tmpsrc = QString("%1.%2.cc").arg(cpp::getTempSourcePath()).arg(hash);
@@ -233,6 +239,17 @@ void CutterPlusPlusPluginWidget::onSnippetEnterPressed() {
   // reset the current snippet index
   ICPP->snippetCur = ICPP->snippetConfigSaved.size();
   snippetEdit->clear();
+}
+
+size_t CutterPlusPlusPluginWidget::directiveHash(const QString &directive) {
+  if (directive.startsWith("#include")) {
+    auto items = directive.split('"');
+    if (items.size() > 1 && QFileInfo(items[1]).exists()) {
+      auto buf = cpp::loadFileString(items[1]);
+      return qHash(buf);
+    }
+  }
+  return 0;
 }
 
 void CutterPlusPlusPluginWidget::onSnippetArrowPressed(int key) {

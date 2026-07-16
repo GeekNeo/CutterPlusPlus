@@ -33,4 +33,7 @@ __CPP_EXPORT__ int exec_file(const char *path);
 // jump to the new offset in Cutter's Disassembly window
 __CPP_EXPORT__ void cpu_goto(uint64_t offset);
 
+// get the current open file path
+__CPP_EXPORT__ const char *current_file();
+
 } // namespace cpp

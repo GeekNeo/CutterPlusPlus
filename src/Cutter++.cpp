@@ -7,6 +7,7 @@
 #include "Utilities.h"
 
 #include <Cutter++.h>
+#include <MainWindow.h>
 #include <QString>
 #include <core/Cutter.h>
 #include <cstdarg>
@@ -35,5 +36,10 @@ int main() {%1; return 0;})")
 int exec_file(const char *path) { return ICPPExec::inst()->runSync(path); }
 
 void cpu_goto(uint64_t offset) { Core()->seek(offset); }
+
+const char *current_file() {
+  ICPP->currentFile = ICPP->mainWin->getFilename().toStdString();
+  return ICPP->currentFile.c_str();
+}
 
 } // namespace cpp

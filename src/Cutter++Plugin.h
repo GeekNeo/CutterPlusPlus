@@ -40,6 +40,7 @@ private:
   void initFeatherPad(const QFont &font);
   void updateTitle(const QString &title);
   QString saveCode();
+  size_t directiveHash(const QString &directive);
 
 public slots:
   void onRunCode();

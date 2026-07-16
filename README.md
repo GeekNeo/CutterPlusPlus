@@ -233,6 +233,9 @@ int exec_file(const char *path);
 
 // jump to the new offset in Cutter's Disassembly window
 void cpu_goto(uint64_t offset);
+
+// get the current open file path
+const char *current_file();
 ```
 
 ### Future Planned

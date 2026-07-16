@@ -27,6 +27,8 @@ typedef bool (*icpp_reglib_func_t)(const char *path);
 
 #define ICPP ICPPExec::inst()
 
+class MainWindow;
+
 class ICPPExec {
 public:
   static ICPPExec *inst() {
@@ -52,6 +54,9 @@ public:
 
   QStringList snippetConfigSaved;
   int snippetCur = 0;
+
+  MainWindow *mainWin = nullptr;
+  std::string currentFile;
 
 private:
   ICPPExec() : settings("Cutter", "Cutter++") {}
