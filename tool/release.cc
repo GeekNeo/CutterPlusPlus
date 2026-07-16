@@ -168,9 +168,9 @@ int main(int argc, char **argv) {
     // remove unused icpp files
     if (name == "icpp") {
       auto bindir = dstdir / "bin";
-      std::vector<std::string_view> unused = {"icpp-gadget" DLLEXT,
-                                              "icpp-server" EXEEXT,
-                                              "imod" EXEEXT, "iopad" EXEEXT};
+      std::vector<std::string_view> unused = {
+          "icpp-gadget" DLLEXT, "icpp-server" EXEEXT, "imod" EXEEXT,
+          "iopad" EXEEXT,       "clang" EXEEXT,       "clang++" EXEEXT};
       for (auto &file : unused)
         fs::remove(bindir / file);
     }
