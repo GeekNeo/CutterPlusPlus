@@ -110,7 +110,8 @@ static auto pack_file(const fs::path &srcfile, const fs::path &dstdir,
 static auto pack_dir(const fs::path &srcdir, const fs::path &dstroot,
                      std::string_view dstname = "") {
   auto dstdir = dstroot / (dstname.size() ? dstname : srcdir.filename());
-  if (!dstname.size() && fs::exists(dstdir))
+  if (!dstname.size() && fs::exists(dstdir) &&
+      srcdir.filename().string().starts_with("Qt"))
     log_return(std::format("Ignored packing {}, {} exists.", srcdir.string(),
                            dstdir.string()),
                return);
