@@ -52,7 +52,7 @@ const char *current_file() {
   int offset = 0;
   if (ICPP->currentFile.starts_with("file://"))
     offset = 7;
-  return ICPP->currentFile.c_str() + 7;
+  return ICPP->currentFile.c_str() + offset;
 }
 
 } // namespace cpp
