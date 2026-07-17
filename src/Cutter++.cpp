@@ -15,10 +15,19 @@
 namespace cpp {
 
 void print(const char *format, ...) {
+  // remove the first \r and the last \n
+  std::string_view origfmt{format};
+  if (origfmt.empty())
+    return;
+  std::string strfmt{format + (origfmt[0] == '\r' ? 1 : 0),
+                     format + origfmt.size() -
+                         (*origfmt.rbegin() == '\n' ? 1 : 0)};
+
   va_list args;
   va_start(args, format);
-  auto formatted = QString::vasprintf(format, args);
+  auto formatted = QString::vasprintf(strfmt.c_str(), args);
   va_end(args);
+
   Core()->message(formatted);
 }
 
