@@ -19,9 +19,9 @@ void print(const char *format, ...) {
   std::string_view origfmt{format};
   if (origfmt.empty())
     return;
-  std::string strfmt{format + (origfmt[0] == '\r' ? 1 : 0),
-                     format + origfmt.size() -
-                         (*origfmt.rbegin() == '\n' ? 1 : 0)};
+  auto begin = format + (origfmt.front() == '\r' ? 1 : 0);
+  auto end = format + origfmt.size() - (strchr("\r\n", origfmt.back()) ? 1 : 0);
+  std::string strfmt{begin, end};
 
   va_list args;
   va_start(args, format);
