@@ -11,6 +11,8 @@
 #include <QLibrary>
 #include <QThread>
 
+#define ICPP_LLVM_VERSION "22"
+
 bool ICPPExec::init(const QString &plugin) {
   if (icpp_exec)
     return true;
@@ -23,9 +25,9 @@ bool ICPPExec::init(const QString &plugin) {
   // parse icpp_exec api
   auto icpplib = icppdir + QDir::separator() + "icpp";
 #if defined(Q_OS_MACOS)
-  icpplib += ".19"; // let QLibrary handle the dylib extension
+  icpplib += "." ICPP_LLVM_VERSION; // let QLibrary handle the dylib extension
 #elif defined(Q_OS_LINUX)
-  icpplib += ".so.19";
+  icpplib += ".so." ICPP_LLVM_VERSION;
 #endif
   QLibrary libicpp(icpplib);
   if (!libicpp.load())

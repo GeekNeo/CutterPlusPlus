@@ -65,11 +65,15 @@ void CutterPlusPlusPlugin::setupInterface(MainWindow *main) {
     proc->start(ICPP->executable(), args);
     connect(
         proc, qOverload<int, QProcess::ExitStatus>(&QProcess::finished), this,
-        [proc](int exitCode, QProcess::ExitStatus exitStatus) {
-          if (exitStatus == QProcess::NormalExit && exitCode == 0)
+        [proc, widget](int exitCode, QProcess::ExitStatus exitStatus) {
+          if (exitStatus == QProcess::NormalExit && exitCode == 0) {
             Core()->message(
                 QString("++++++++++++++++++++++++\n%1++++++++++++++++++++++++")
                     .arg(QString::fromUtf8(proc->readAllStandardOutput())));
+            // Run the initial Hello snippet to initialize the incremental
+            // compiler
+            widget->onRunCode();
+          }
           proc->deleteLater();
         });
   } else {

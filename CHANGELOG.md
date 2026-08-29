@@ -1,3 +1,8 @@
+## v0.2.1
+### Improvements:
+ * upgrade icpp to version 0.3.0 with LLVM-22;
+ * run the hello snippet at startup to initialize the incremental compilation context;
+
 ## v0.2.0
 ### Bug fixes:
  * prevent a crash from QEvent::InputMethodQuery event;
