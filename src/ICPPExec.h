@@ -38,7 +38,7 @@ public:
 
   const char *executable() { return icpp.data(); }
 
-  bool init(const QString &plugin);
+  QString init(const QString &plugin);
   void include(const QString &dir);
   void optLevel(const QString &optval);
 

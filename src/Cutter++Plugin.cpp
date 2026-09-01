@@ -56,7 +56,8 @@ void CutterPlusPlusPlugin::setupInterface(MainWindow *main) {
   main->addPluginDockWidget(widget);
   ICPP->mainWin = main;
 
-  if (ICPP->init(cpp::getCurrentPluginFullPath())) {
+  auto errmsg = ICPP->init(cpp::getCurrentPluginFullPath());
+  if (errmsg.isEmpty()) {
     QStringList args;
     args << "--version";
 
@@ -77,7 +78,8 @@ void CutterPlusPlusPlugin::setupInterface(MainWindow *main) {
           proc->deleteLater();
         });
   } else {
-    Core()->message(QString("Failed to load ICPP execution engine..."));
+    Core()->message(
+        QString("Failed to load ICPP execution engine: %1").arg(errmsg));
   }
 }
 

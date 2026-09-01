@@ -11,11 +11,15 @@
 #include <QLibrary>
 #include <QThread>
 
+#if defined(Q_OS_WIN)
+#include <Windows.h>
+#endif
+
 #define ICPP_LLVM_VERSION "22"
 
-bool ICPPExec::init(const QString &plugin) {
+QString ICPPExec::init(const QString &plugin) {
   if (icpp_exec)
-    return true;
+    return QString();
 
   QFileInfo finfo(plugin);
   auto pkgdir = finfo.absolutePath() + QDir::separator() + "Cutter++";
@@ -25,19 +29,22 @@ bool ICPPExec::init(const QString &plugin) {
   // parse icpp_exec api
   auto icpplib = icppdir + QDir::separator() + "icpp";
 #if defined(Q_OS_MACOS)
-  icpplib += "." ICPP_LLVM_VERSION; // let QLibrary handle the dylib extension
+  icpplib += "." ICPP_LLVM_VERSION ".dylib";
 #elif defined(Q_OS_LINUX)
   icpplib += ".so." ICPP_LLVM_VERSION;
+#else
+  ::SetDllDirectoryW(icppdir.toStdWString().data());
+  icpplib += ".dll";
 #endif
   QLibrary libicpp(icpplib);
   if (!libicpp.load())
-    return false;
+    return libicpp.errorString();
   icpp_exec = (icpp_exec_func_t)libicpp.resolve("icpp_exec");
   if (!icpp_exec)
-    return false;
+    return libicpp.errorString();
   icpp_reglib = (icpp_reglib_func_t)libicpp.resolve("icpp_reglib");
   if (!icpp_reglib)
-    return false;
+    return libicpp.errorString();
 
   // compose the main icpp executable
   QString icppexe = icppdir + QDir::separator() + "icpp";
@@ -50,7 +57,8 @@ bool ICPPExec::init(const QString &plugin) {
   icpp_exec(icpp.data(), nullptr, nullptr, nullptr, 0);
   // register our Cutter++ apis
   if (!registerLibrary(plugin))
-    return false;
+    return QString("Failed to register Cutter++ runtime library: %1")
+        .arg(plugin);
 
   // parse Cutter's include directory
   QString exeDir = QCoreApplication::applicationDirPath();
@@ -80,7 +88,7 @@ bool ICPPExec::init(const QString &plugin) {
   include(pkgdir + QDir::separator() + "QtCore");
   include(pkgdir + QDir::separator() + "QtGui");
   include(pkgdir + QDir::separator() + "QtWidgets");
-  return true;
+  return QString();
 }
 
 void ICPPExec::include(const QString &dir) {
